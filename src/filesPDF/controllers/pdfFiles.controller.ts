@@ -1,30 +1,30 @@
 import { BadRequestException, Controller, Get, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
-import { FilesService } from "../services/files.service";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { fileFilter } from "src/helpers/fileFilter.helper";
 import { diskStorage } from "multer";
 import { fileNamer } from "src/helpers/fileNamer.helper";
+import { FilesPDFService } from "../services/pdfFiles.service";
+import { fileFilterpdf } from "src/helpers/fileFilterpdf.helper";
 
-@Controller('files')
-export class FilesController {
-    constructor( private readonly filesService: FilesService) {}
+@Controller('pdfFiles')
+export class FilesPDFController {
+    constructor( private readonly filespdfService: FilesPDFService) {}
 
     @Post('upload')
     @UseInterceptors(
-        FileInterceptor('file', {
+        FileInterceptor('pdffile', {
           //Llamamos al fileFilter de Multer y le asignamos nuestro helper
-         fileFilter: fileFilter,
+         fileFilter: fileFilterpdf,
 
          //Este nos sirve para almacenamiento del archivo
           storage: diskStorage({
-             destination: './static/products/',
+             destination: './files/pdf/archivos',
              filename: fileNamer,
            }),
         }),
     )
     uploadFile(@UploadedFile() file: Express.Multer.File ) {
        if(!file){
-          throw new BadRequestException('Asegurese que el archivo sea una imagen');
+          throw new BadRequestException('Asegurese que el archivo sea un archivo pdf');
         }
 
         return {

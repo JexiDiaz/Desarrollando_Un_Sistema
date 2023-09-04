@@ -5,10 +5,8 @@ import { AppService } from './app.service';
 import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import {  MarcasModule } from './marcas/marcas.module';
-import { Modelo } from './marcas/entities/modelo.entity';
 import { FilesModule } from './files/files.module';
-import { Category } from './products/entities/category.entity';
-
+import { FilesPDFModule } from './filesPDF/filespdf.module';
 
 
 
@@ -29,10 +27,9 @@ import { Category } from './products/entities/category.entity';
     UsersModule,
     MarcasModule,
     FilesModule,
+    FilesPDFModule,
   
    
-   
-    
   ],
   controllers: [AppController],
   providers: [AppService],
