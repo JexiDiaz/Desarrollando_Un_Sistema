@@ -1,4 +1,4 @@
-import { IsDate, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsArray, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
     
 
     export class CreateProductDto {
@@ -40,6 +40,12 @@ import { IsDate, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLe
         @IsNumber()
         @IsNotEmpty()
         proveedor_id: number;
+        
+        //El images en el string lleva [] porque es un arreglo
+        @IsArray({ each: true })
+        @IsString()
+        @IsOptional()
+        images?: string[];
 
     }
 
