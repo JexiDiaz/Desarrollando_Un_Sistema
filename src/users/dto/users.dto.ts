@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsString, MaxLength } from 'class-validator';
+import { IsArray,
+     IsNotEmpty, 
+     IsNumber, 
+     IsOptional, 
+     IsString,
+      MaxLength 
+    } from 'class-validator';
     
 
     export class CreateUsersDto {
@@ -37,5 +43,10 @@ import { IsNotEmpty, IsNumber, IsString, MaxLength } from 'class-validator';
         @IsNotEmpty()
         stock: number;
 
-
+     //El images en el string lleva [] porque es un arreglo
+        @IsArray({ each: true })
+        @IsString()
+        @IsOptional()
+        images?: string[];
     }
+

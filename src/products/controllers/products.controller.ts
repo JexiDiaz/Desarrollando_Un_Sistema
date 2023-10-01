@@ -11,7 +11,7 @@ import { Controller,
  import { CreateProductDto } from '../dto/product.dto';
  
  
- @Controller('Products')
+ @Controller('products')
  export class ProductsController {
    constructor(private readonly productsServices: ProductsService) {}
  

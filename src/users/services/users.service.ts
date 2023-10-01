@@ -1,55 +1,87 @@
-import { Injectable } from '@nestjs/common';
-import { Users } from '../entities/users.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUsersDto } from '../dto/users.dto';
-
-
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import {  Users } from "../entities/users.entity";
+import { DataSource, Repository } from "typeorm";
+import { UsersImage } from "../entities/users.image.entity";
+import { CreateUsersDto } from "../dto/users.dto";
 
 
 
 @Injectable()
-export class UsersService {
-  constructor(
-    @InjectRepository(Users)
-    private readonly usersRepo: Repository<Users>,
-  ) {}
+export class UsersService{
+    constructor(
+     @InjectRepository(Users)
+      private  readonly usersRepo: Repository<Users>,
 
-  //Este es para crear un registro  
-  async create( createUsersDto: CreateUsersDto ){
-    const users = this. usersRepo.create(createUsersDto);
-    await this.usersRepo.save(users);
+         @InjectRepository(UsersImage)
+        private usersImageRepo: Repository<UsersImage>,
 
-    return Users;
-  }
+        private readonly dataSource: DataSource,
+    ){}
 
-    //Encontrar un registro de users
+    async create (UsersDto: CreateUsersDto){
+        const {images = [], ...detailUsers} = UsersDto;
+        const users = await this.usersRepo.create({
+            ...detailUsers,
+            images:images.map((image) => this.usersImageRepo.create({url:image}))
+        })
+
+        await this.usersRepo.save(users);
+        return users;
+    }
+
+
+    //Encontrar un user
     findOne(id: number){
-      return this.usersRepo.findOneBy({id});
+        return this.usersRepo.findOne({  
+            where:{id},
+            relations:{
+            images:true
+        }});
     }
-
-    //Mostrar todos los registros de users
+    //mostrar todos los usuarios
     findAll(){
-      return this.usersRepo.find({
-       order: {id: 'ASC' }, 
-      });
+        return   this.usersRepo.find({
+            order: {id: 'ASC'},
+            relations:{
+            images:true}
+        });
+    }
+    //eliminar un usuario
+    async remove(id:number){
+        const users =await this.findOne(id);
+        await this.usersRepo.remove(users);
+        return ' Este suario  esta eliminado';
     }
 
-    //Eliminar un registro de users
-    async remove(id: number){
-      const Users = await this.findOne(id);
-      await this.usersRepo.remove(Users);
-      return 'usuario eliminado satisfactoriamente';
-    }
+  
+    async update(id: number, usersDto: CreateUsersDto){
+        const {images, ...updateAll} = usersDto
+        const users = await this.usersRepo.preload({
+            id:id,
+            ... updateAll
+        });
 
-    //Actualizar un producto o un registro de users
-    async update(id: number, cambios : CreateUsersDto){
-      // aqui se encuentra el users
-      const oldUsers = await this.findOne(id);
-      //Aqui lo actualizo o lo uno con los nuevos cambios del users
-      const updatedUsers = await this.usersRepo.merge(oldUsers, cambios );
-      //Aqui retornare  el product
-      return this.usersRepo.save(updatedUsers);
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        if(images){
+            await queryRunner.manager.delete(UsersImage, {users: {id}});
+
+            users.images = images.map((image)=>
+                this.usersImageRepo.create({url: image}),
+            )
+
+        }else{
+            users.images =await this.usersImageRepo.findBy({ users: {id}});
+        }
+
+        await queryRunner.manager.save(users);
+
+        await queryRunner.commitTransaction();
+        await queryRunner.release();
+
+        return users;
     }
- 
-  }
+}

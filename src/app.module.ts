@@ -28,6 +28,7 @@ import { FilesPDFModule } from './filesPDF/filespdf.module';
     MarcasModule,
     FilesModule,
     FilesPDFModule,
+
   
    
   ],
