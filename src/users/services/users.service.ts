@@ -1,11 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import {  Users } from "../entities/users.entity";
 import { DataSource, Repository } from "typeorm";
 import { UsersImage } from "../entities/users.image.entity";
-import { CreateUsersDto } from "../dto/users.dto";
-
-
+import { CreateUsersDto } from '../dto/users.dto';
+import * as bcrypt from 'bcrypt';
+import { LoginUserDto } from "../dto/login-users.dto";
 
 @Injectable()
 export class UsersService{
@@ -20,16 +20,39 @@ export class UsersService{
     ){}
 
     async create (UsersDto: CreateUsersDto){
-        const {images = [], ...detailUsers} = UsersDto;
+        const {images = [], password, ...detailUsers} = UsersDto;
         const users = await this.usersRepo.create({
             ...detailUsers,
+            password: bcrypt.hashSync(password, 10),
             images:images.map((image) => this.usersImageRepo.create({url:image}))
-        })
+        });
 
         await this.usersRepo.save(users);
         return users;
     }
 
+    async login(login: LoginUserDto) {
+        const { password, email } = login;
+        const user = await  this.usersRepo.findOne({
+            where: { email },
+            select: { password: true, email: true },
+        });
+
+        if (!user) {
+            throw new UnauthorizedException(
+             'Credenciales no validas, correo no encontrado',
+            );
+        }
+    
+        //Comparar si  la password ingresada es la misma que esta en la base de datos 
+        if (!bcrypt.compareSync(password, user.password)) {
+            throw new UnauthorizedException(
+                'Credenciales no validas, password incorrecta',
+            );
+        }
+
+        return user;
+    }
 
     //Encontrar un user
     findOne(id: number){

@@ -10,6 +10,7 @@ import { UsersImage } from './entities/users.image.entity';
     imports: [TypeOrmModule.forFeature([Users,UsersImage])],
     controllers: [UsersController],
     providers: [UsersService],
+    exports: [TypeOrmModule, UsersModule]
    
 })
 export class UsersModule{}

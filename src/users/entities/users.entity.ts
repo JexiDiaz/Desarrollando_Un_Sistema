@@ -23,6 +23,9 @@ export class Users {
   @Column({ type: 'boolean', default: true })
   active: boolean;
 
+  @Column({ type: 'text', array: true, default: [ 'users'] })
+  roles: string;
+
   @OneToMany(() => UsersImage, (usersImage) => usersImage.users, {
     cascade : true
   })

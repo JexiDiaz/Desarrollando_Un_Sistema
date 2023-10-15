@@ -9,6 +9,7 @@ import { Controller,
      } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import { CreateUsersDto } from '../dto/users.dto';
+import { LoginUserDto } from '../dto/login-users.dto';
 
  
  
@@ -19,6 +20,11 @@ import { CreateUsersDto } from '../dto/users.dto';
    @Post()
    async create(@Body() usersDto: CreateUsersDto ) {
      return await this.UsersServices.create(usersDto);
+   }
+
+   @Post('login')
+   async login(@Body() login: LoginUserDto) {
+    return this.UsersServices.login(login);
    }
 
    @Get() //Este seria para encontrar todo el servicio
